@@ -1,0 +1,9 @@
+{
+  "name": "brevinel-erp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "BrévERP – jeu pédagogique MGTAL43 (Laiterie Brévinel, entreprise fictive)",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=20" }
+}

@@ -1,0 +1,15 @@
+# Prêt pour Coolify (build pack « Docker Compose ») : le proxy de Coolify gère le domaine et le HTTPS.
+# Dans Coolify : Domains → https://brevinel.ton-domaine.fr:3000  ·  Environment → ADMIN_PASSWORD
+services:
+  brevinel:
+    build: .
+    restart: unless-stopped
+    expose:
+      - "3000"
+    environment:
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:?}
+    volumes:
+      - brevinel-data:/app/data
+
+volumes:
+  brevinel-data:

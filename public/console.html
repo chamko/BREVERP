@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Console animateur</title>
+  <link rel="stylesheet" href="console.css">
+</head>
+<body>
+  <section id="login" class="center hidden">
+    <form id="login-form" class="card narrow">
+      <h1>Console animateur</h1>
+      <label>Mot de passe <input id="pwd" type="password" required></label>
+      <button class="primary">Entrer</button>
+      <p id="login-error" class="error"></p>
+    </form>
+  </section>
+
+  <section id="app" class="hidden">
+    <header class="bar">
+      <h1>🧀 Brévinel · Console</h1>
+      <a href="/ecran" target="_blank">📺 Écran projeté</a>
+      <a href="/" target="_blank">🖥 ERP étudiant</a>
+      <span class="spacer"></span>
+      <button id="reset" class="danger">Réinitialiser la partie</button>
+    </header>
+
+    <div class="wrap">
+      <section class="card">
+        <h2>Contrôles</h2>
+        <div class="controls">
+          <button id="ransom-btn"></button>
+          <button id="cold-btn"></button>
+          <button id="shop-btn"></button>
+          <button id="clear-btn">Effacer l'inject de l'écran</button>
+        </div>
+        <div class="controls">
+          <input id="timer-label" placeholder="Libellé du chrono (ex : Activité cloud)">
+          <span id="timer-presets"></span>
+          <button data-timer="0">⏹ Stop</button>
+          <span id="timer-view" class="pill"></span>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Équipes</h2>
+        <div class="controls"><input id="reason" placeholder="Motif des points (affiché dans l'historique)"></div>
+        <div id="teams" class="teams"></div>
+      </section>
+
+      <div class="cols">
+        <section class="card">
+          <h2>Injects</h2>
+          <div id="injects"></div>
+        </section>
+        <section class="card">
+          <h2>Mains courantes</h2>
+          <div id="feed" class="feed"></div>
+          <h2>Historique</h2>
+          <div id="history" class="feed"></div>
+        </section>
+      </div>
+    </div>
+  </section>
+  <div id="toast" class="toast hidden"></div>
+  <script src="console.js"></script>
+</body>
+</html>

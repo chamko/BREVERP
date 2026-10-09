@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BrévERP 3.2</title>
+  <link rel="stylesheet" href="erp.css">
+</head>
+<body>
+  <!-- Connexion -->
+  <section id="login" class="login hidden">
+    <div class="window login-box">
+      <div class="titlebar">BrévERP 3.2 – Connexion</div>
+      <div class="window-body">
+        <div class="logo">🥛 <b>BrévERP</b> <small>v3.2 – © 2009 SoftLait</small></div>
+        <p>Laiterie Brévinel – Progiciel de gestion intégré</p>
+        <form id="login-form">
+          <label>Code équipe<input id="login-code" autocomplete="off" autocapitalize="characters" required></label>
+          <button type="submit">Se connecter</button>
+          <p id="login-error" class="error"></p>
+        </form>
+        <p class="small muted">Entreprise fictive – jeu pédagogique MGTAL43</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Application -->
+  <section id="app" class="hidden">
+    <header class="topbar">
+      <div class="brand">🥛 BrévERP <small>3.2</small></div>
+      <div class="team-chip"><span id="team-dot" class="dot"></span><span id="team-name"></span></div>
+      <div class="stat">Budget <b id="team-budget"></b></div>
+      <div class="stat">Confiance <b id="team-confiance"></b></div>
+      <div class="stat timer hidden" id="timer"></div>
+      <button id="logout" class="link">Déconnexion</button>
+    </header>
+    <div class="layout">
+      <nav id="nav">
+        <a data-view="accueil">🏠 Accueil</a>
+        <a data-view="messages">✉️ Messagerie <span id="badge" class="badge hidden"></span></a>
+        <a data-view="lots" class="erp">📦 Traçabilité lots</a>
+        <a data-view="collecte" class="erp">🚛 Collecte lait</a>
+        <a data-view="froid" class="erp">❄️ Chambres froides</a>
+        <a data-view="fichiers" class="erp">📁 Fichiers partagés</a>
+        <a data-view="boutique">🛒 Achats &amp; budget</a>
+        <a data-view="courante">📝 Main courante</a>
+      </nav>
+      <main id="view"></main>
+    </div>
+  </section>
+
+  <!-- Rançon -->
+  <div id="ransom" class="ransom hidden">
+    <div class="ransom-box">
+      <div class="skull">☠</div>
+      <h1>VOS FICHIERS ONT ÉTÉ CHIFFRÉS</h1>
+      <p class="ransom-sub">LockLait – Ransomware-as-a-Service</p>
+      <p>Votre ERP, vos fichiers partagés et vos sauvegardes connectées sont chiffrés.<br>
+        Pour obtenir la clé de déchiffrement : <b><span id="ransom-price"></span> en Bitcoin</b>.</p>
+      <p class="ransom-count">Temps restant : <span id="ransom-countdown"></span></p>
+      <div id="ransom-status" class="ransom-status"></div>
+      <div id="ransom-actions" class="ransom-actions"></div>
+      <p class="small">La messagerie (Microsoft 365, en SaaS) et la main courante papier restent accessibles :</p>
+      <p><button class="ghost" data-goto="messages">✉️ Messagerie</button> <button class="ghost" data-goto="courante">📝 Main courante</button> <button class="ghost" data-goto="boutique">🛒 Budget</button></p>
+      <p class="tiny">Simulation pédagogique – aucun fichier réel n'est concerné.</p>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="erp.js"></script>
+</body>
+</html>

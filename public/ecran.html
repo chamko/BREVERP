@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Brévinel · Écran</title>
+  <style>
+    :root { --y: #FEC718; --ink: #1C1C1C; --bg: #FBFAF5; --muted: #6b6b6b; --red: #e53935; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink); font-family: Poppins, system-ui, sans-serif; overflow-x: hidden; }
+    .hidden { display: none !important; }
+    header { display: flex; align-items: center; gap: 24px; padding: 2vh 3vw; background: var(--y); }
+    header h1 { margin: 0; font-size: clamp(20px, 2.6vw, 44px); font-weight: 800; flex: 1; }
+    header small { display: block; font-size: .45em; font-weight: 500; }
+    #timer { font-size: clamp(28px, 5vw, 88px); font-weight: 800; font-variant-numeric: tabular-nums; background: var(--ink); color: var(--y); padding: .1em .4em; border-radius: 12px; }
+    #timer-label { font-size: clamp(12px, 1.2vw, 20px); text-align: right; font-weight: 600; }
+    main { display: grid; grid-template-columns: 3fr 2fr; gap: 3vw; padding: 3vh 3vw; }
+    h2 { font-size: clamp(16px, 1.6vw, 28px); margin: 0 0 2vh; }
+    .row { display: grid; grid-template-columns: minmax(120px, 16vw) 1fr; gap: 1vw; align-items: center; margin-bottom: 2.2vh; }
+    .tname { font-weight: 700; font-size: clamp(14px, 1.5vw, 26px); }
+    .tbudget { font-size: clamp(11px, .95vw, 16px); color: var(--muted); }
+    .track { background: #ebe8dc; height: clamp(26px, 4.6vh, 54px); border-radius: 10px; position: relative; overflow: hidden; }
+    .fill { height: 100%; border-radius: 10px; transition: width 1s cubic-bezier(.2,.8,.2,1); display: flex; align-items: center; justify-content: flex-end; padding-right: 12px; font-weight: 800; font-size: clamp(14px, 1.6vw, 28px); color: var(--ink); }
+    .jokers { font-size: clamp(14px, 1.4vw, 24px); margin-left: 8px; }
+    .inject { background: #fff; border: 3px solid var(--ink); border-radius: 16px; padding: 2.5vh 2vw; box-shadow: 8px 8px 0 var(--y); }
+    .inject .from { color: var(--muted); font-size: clamp(12px, 1.1vw, 20px); }
+    .inject .subject { font-size: clamp(18px, 2vw, 34px); font-weight: 800; margin: .3em 0; }
+    .inject .body { white-space: pre-wrap; font-size: clamp(12px, 1.15vw, 20px); max-height: 50vh; overflow: hidden; }
+    .inject.pop { animation: pop .6s ease-out; }
+    @keyframes pop { 0% { transform: scale(.85); opacity: 0; } 60% { transform: scale(1.03); } 100% { transform: none; opacity: 1; } }
+    .idle { color: var(--muted); font-size: clamp(14px, 1.3vw, 22px); }
+    .cold { margin-top: 2vh; background: var(--red); color: #fff; font-weight: 800; padding: 1.5vh 1vw; border-radius: 12px; font-size: clamp(14px, 1.6vw, 28px); animation: blink 1s steps(2) infinite; }
+    @keyframes blink { 50% { opacity: .55; } }
+    .band { background: #0b0000; color: #ff3b3b; font-family: 'Courier New', monospace; font-weight: 800; text-align: center; padding: 1.2vh 2vw; font-size: clamp(14px, 1.6vw, 28px); }
+    #sound { position: fixed; bottom: 12px; right: 12px; font: inherit; padding: 8px 14px; border-radius: 8px; border: 2px solid var(--ink); background: #fff; cursor: pointer; z-index: 20; }
+    #ransom { position: fixed; inset: 0; background: #0b0000; color: #ff3b3b; display: grid; place-items: center; text-align: center; font-family: 'Courier New', monospace; z-index: 10; padding: 16px; }
+    #ransom h1 { font-size: clamp(28px, 6vw, 110px); margin: 0; animation: glitch 1.4s infinite; }
+    #ransom .skull { font-size: clamp(60px, 12vw, 220px); }
+    #ransom p { color: #ffd0d0; font-size: clamp(14px, 1.8vw, 32px); }
+    #ransom .count { color: #ff3b3b; font-weight: 800; font-size: clamp(24px, 4vw, 70px); }
+    @keyframes glitch { 0%, 90%, 100% { transform: none; } 93% { transform: translateX(-6px) skewX(4deg); } 96% { transform: translateX(6px); } }
+    @media (max-width: 800px) { main { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Laiterie Brévinel <small>48h pour sauver le système d'information</small></h1>
+    <div><div id="timer-label"></div><div id="timer" class="hidden"></div></div>
+  </header>
+  <div id="ransom-band" class="band hidden"></div>
+  <main>
+    <section>
+      <h2>Confiance d'Hélène Marchal</h2>
+      <div id="board"></div>
+    </section>
+    <section>
+      <h2>Dernière nouvelle</h2>
+      <div id="inject"><p class="idle">Aucun événement… pour l'instant.</p></div>
+      <div id="cold" class="cold hidden">🚨 Chambre froide n°2 : +9 °C</div>
+    </section>
+  </main>
+  <div id="ransom" class="hidden">
+    <div>
+      <div class="skull">☠</div>
+      <h1>LAITERIE BRÉVINEL<br>EST CHIFFRÉE</h1>
+      <p>LockLait réclame 80 000 € en Bitcoin</p>
+      <p class="count" id="ransom-count"></p>
+      <p style="font-size:14px;opacity:.6">Simulation pédagogique</p>
+    </div>
+  </div>
+  <button id="sound">🔇 Activer le son</button>
+
+  <script>
+    'use strict';
+    const $ = (s) => document.querySelector(s);
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const eur = (n) => n.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+    const JOKER_ICONS = { backup: '💾', pra: '🛟', sondes: '🌡' };
+    let S = null, offset = 0, lastKey = null, firstRender = true, soundOn = false;
+    const audio = new Audio();
+
+    $('#sound').addEventListener('click', () => {
+      soundOn = !soundOn;
+      $('#sound').textContent = soundOn ? '🔊 Son activé' : '🔇 Activer le son';
+      if (soundOn) { audio.src = ''; audio.play().catch(() => {}); }
+    });
+
+    async function refresh() {
+      S = await (await fetch('/api/state')).json();
+      offset = S.now - Date.now();
+      render();
+    }
+
+    function render() {
+      const sorted = [...S.teams].sort((a, b) => b.confiance - a.confiance);
+      $('#board').innerHTML = sorted.map((t) => `
+        <div class="row">
+          <div><div class="tname">${esc(t.name)}<span class="jokers">${t.jokers.map((j) => JOKER_ICONS[j] || '').join('')}</span></div><div class="tbudget">${eur(t.budget)}</div></div>
+          <div class="track"><div class="fill" style="width:${Math.max(6, t.confiance)}%;background:${esc(t.color)}">${t.confiance}</div></div>
+        </div>`).join('');
+
+      const inj = S.lastInject;
+      const key = inj ? inj.id + inj.at : null;
+      if (!inj) $('#inject').innerHTML = '<p class="idle">Aucun événement… pour l\'instant.</p>';
+      else if (key !== lastKey) {
+        $('#inject').innerHTML = `<div class="inject pop"><div class="from">✉️ ${esc(inj.from)}</div><div class="subject">${esc(inj.subject)}</div><div class="body">${esc(inj.body)}</div></div>`;
+        if (!firstRender && soundOn && inj.audio) { audio.src = `audio/${inj.audio}`; audio.play().catch(() => {}); }
+      }
+      lastKey = key;
+      firstRender = false;
+      $('#cold').classList.toggle('hidden', !S.coldAlarm);
+      tick();
+    }
+
+    function tick() {
+      if (!S) return;
+      const now = Date.now() + offset;
+      const t = S.timer;
+      const left = t ? t.endsAt - now : 0;
+      $('#timer').classList.toggle('hidden', !(left > 0));
+      $('#timer-label').textContent = left > 0 ? (t.label || '') : '';
+      if (left > 0) { const s = Math.round(left / 1000); $('#timer').textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; }
+      // Plein écran pendant 30 s, puis bandeau pour laisser voir les injects suivants.
+      const fresh = S.ransom.active && now - S.ransom.since < 30000;
+      $('#ransom').classList.toggle('hidden', !fresh);
+      $('#ransom-band').classList.toggle('hidden', !S.ransom.active || fresh);
+      if (S.ransom.active) {
+        const r = S.ransom.since + 72 * 3600000 - now;
+        const h = Math.floor(r / 3600000), m = Math.floor(r / 60000) % 60, s = Math.floor(r / 1000) % 60;
+        $('#ransom-count').textContent = `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        $('#ransom-band').textContent = `☠ SI chiffré par LockLait · rançon : 80 000 € · ultimatum ${$('#ransom-count').textContent}`;
+      }
+    }
+
+    refresh();
+    new EventSource('/events').addEventListener('update', () => refresh().catch(() => {}));
+    setInterval(tick, 1000);
+  </script>
+</body>
+</html>
