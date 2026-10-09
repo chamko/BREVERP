@@ -32,7 +32,9 @@
     .cold { margin-top: 2vh; background: var(--red); color: #fff; font-weight: 800; padding: 1.5vh 1vw; border-radius: 12px; font-size: clamp(14px, 1.6vw, 28px); animation: blink 1s steps(2) infinite; }
     @keyframes blink { 50% { opacity: .55; } }
     .band { background: #0b0000; color: #ff3b3b; font-family: 'Courier New', monospace; font-weight: 800; text-align: center; padding: 1.2vh 2vw; font-size: clamp(14px, 1.6vw, 28px); }
-    #sound { position: fixed; bottom: 12px; right: 12px; font: inherit; padding: 8px 14px; border-radius: 8px; border: 2px solid var(--ink); background: #fff; cursor: pointer; z-index: 20; }
+    #sound-bar { position: fixed; bottom: 12px; right: 12px; display: flex; gap: 8px; z-index: 20; }
+    #sound-bar button { font: inherit; padding: 8px 14px; border-radius: 8px; border: 2px solid var(--ink); background: #fff; cursor: pointer; }
+    #sound-bar button.warn { background: var(--red); color: #fff; border-color: var(--red); }
     #ransom { position: fixed; inset: 0; background: #0b0000; color: #ff3b3b; display: grid; place-items: center; text-align: center; font-family: 'Courier New', monospace; z-index: 10; padding: 16px; }
     #ransom h1 { font-size: clamp(28px, 6vw, 110px); margin: 0; animation: glitch 1.4s infinite; }
     #ransom .skull { font-size: clamp(60px, 12vw, 220px); }
@@ -68,7 +70,7 @@
       <p style="font-size:14px;opacity:.6">Simulation pédagogique</p>
     </div>
   </div>
-  <button id="sound">🔇 Activer le son</button>
+  <div id="sound-bar"><button id="replay" class="hidden">▶ Rejouer le message</button><button id="sound">🔇 Activer le son</button></div>
 
   <script>
     'use strict';
@@ -79,11 +81,29 @@
     let S = null, offset = 0, lastKey = null, firstRender = true, soundOn = false;
     const audio = new Audio();
 
+    // Les navigateurs (Safari surtout) n'autorisent le son qu'après un clic : on joue un vrai fichier
+    // en sourdine pendant ce clic pour débloquer l'élément audio pour la suite.
     $('#sound').addEventListener('click', () => {
       soundOn = !soundOn;
       $('#sound').textContent = soundOn ? '🔊 Son activé' : '🔇 Activer le son';
-      if (soundOn) { audio.src = ''; audio.play().catch(() => {}); }
+      $('#sound').classList.remove('warn');
+      if (!soundOn) { audio.pause(); return; }
+      audio.src = 'audio/helene_karim.mp3';
+      audio.muted = true;
+      audio.play().then(() => { audio.pause(); audio.currentTime = 0; audio.muted = false; })
+        .catch(() => { audio.muted = false; });
     });
+
+    function playInject(file) {
+      audio.muted = false;
+      audio.src = `audio/${file}`;
+      audio.play().catch(() => {
+        $('#sound').textContent = '🔇 Son bloqué : cliquez ici';
+        $('#sound').classList.add('warn');
+        soundOn = false;
+      });
+    }
+    $('#replay').addEventListener('click', () => { if (S?.lastInject?.audio) playInject(S.lastInject.audio); });
 
     async function refresh() {
       S = await (await fetch('/api/state')).json();
@@ -104,10 +124,11 @@
       if (!inj) $('#inject').innerHTML = '<p class="idle">Aucun événement… pour l\'instant.</p>';
       else if (key !== lastKey) {
         $('#inject').innerHTML = `<div class="inject pop"><div class="from">✉️ ${esc(inj.from)}</div><div class="subject">${esc(inj.subject)}</div><div class="body">${esc(inj.body)}</div></div>`;
-        if (!firstRender && soundOn && inj.audio) { audio.src = `audio/${inj.audio}`; audio.play().catch(() => {}); }
+        if (!firstRender && soundOn && inj.audio) playInject(inj.audio);
       }
       lastKey = key;
       firstRender = false;
+      $('#replay').classList.toggle('hidden', !inj?.audio);
       $('#cold').classList.toggle('hidden', !S.coldAlarm);
       tick();
     }

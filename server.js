@@ -308,8 +308,26 @@ function serveStatic(req, res, pathname) {
   if (!file.startsWith(PUBLIC_DIR + path.sep)) return send(res, 404, { error: 'Introuvable' });
   fs.stat(file, (err, st) => {
     if (err || !st.isFile()) return send(res, 404, { error: 'Introuvable' });
-    res.writeHead(200, { 'Content-Type': MIME[path.extname(file)] || 'application/octet-stream', 'Content-Length': st.size, 'Cache-Control': 'no-cache' });
-    fs.createReadStream(file).pipe(res);
+    const headers = { 'Content-Type': MIME[path.extname(file)] || 'application/octet-stream', 'Accept-Ranges': 'bytes', 'Cache-Control': 'no-cache' };
+    // Safari et iOS ne lisent un fichier audio que si le serveur répond aux requêtes partielles (Range).
+    const range = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '');
+    let start = 0;
+    let end = st.size - 1;
+    let status = 200;
+    if (range && (range[1] || range[2])) {
+      start = range[1] ? Number(range[1]) : Math.max(0, st.size - Number(range[2]));
+      end = range[1] && range[2] ? Math.min(Number(range[2]), st.size - 1) : st.size - 1;
+      if (start > end || start >= st.size) {
+        res.writeHead(416, { 'Content-Range': `bytes */${st.size}` });
+        return res.end();
+      }
+      status = 206;
+      headers['Content-Range'] = `bytes ${start}-${end}/${st.size}`;
+    }
+    headers['Content-Length'] = end - start + 1;
+    res.writeHead(status, headers);
+    if (req.method === 'HEAD') return res.end();
+    fs.createReadStream(file, { start, end }).pipe(res);
   });
 }
 
@@ -360,7 +378,7 @@ async function route(req, res) {
     return send(res, 200, { ok: true });
   }
 
-  if (method === 'GET' && !pathname.startsWith('/api/')) return serveStatic(req, res, pathname);
+  if ((method === 'GET' || method === 'HEAD') && !pathname.startsWith('/api/')) return serveStatic(req, res, pathname);
   send(res, 404, { error: 'Introuvable' });
 }
 
